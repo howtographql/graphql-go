@@ -6,9 +6,9 @@ import (
 
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/relay"
-	"io/ioutil"
 	"github.com/howtographql/graphql-go/resolvers"
 	"fmt"
+	"io/ioutil"
 )
 
 var schema *graphql.Schema

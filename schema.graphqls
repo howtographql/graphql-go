@@ -1,7 +1,12 @@
-schema {
-    query: Query
+type Link {
+    url: String!
+    description: String!
 }
 
 type Query {
-    hello: String!
+    allLinks: [Link]
+}
+
+schema {
+    query: Query
 }
