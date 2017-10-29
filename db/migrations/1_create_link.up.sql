@@ -1,0 +1,6 @@
+
+CREATE TABLE IF NOT EXISTS link (
+  id VARCHAR(100) PRIMARY KEY UNIQUE,
+  url TEXT,
+  description TEXT
+);

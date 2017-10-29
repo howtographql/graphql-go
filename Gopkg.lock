@@ -3,6 +3,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/lib/pq"
+  packages = [".","oid"]
+  revision = "b609790bd85edf8e9ab7e0f8912750a786177bcf"
+
+[[projects]]
+  name = "github.com/mattes/migrate"
+  packages = [".","database","database/postgres","source","source/file"]
+  revision = "035c07716cd373d88456ec4d701402df52584cb4"
+  version = "v3.0.1"
+
+[[projects]]
+  branch = "master"
   name = "github.com/neelance/graphql-go"
   packages = [".","errors","internal/common","internal/exec","internal/exec/packer","internal/exec/resolvable","internal/exec/selected","internal/query","internal/schema","internal/validation","introspection","log","relay","trace"]
   revision = "10eb949b8f4439212ef19d5d924c47c10c110cc7"
@@ -14,6 +26,12 @@
   version = "v1.0.2"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "879c5887cd475cd7864858769793b2ceb0d44feb"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
@@ -22,6 +40,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9b94db6cafffa36119ac4dd4e8012652fff549dcd394596980743df85e5c7484"
+  inputs-digest = "ad604cee13949870c6e825022c52d35b6a85344e32e4dabc5838c51e09695291"
   solver-name = "gps-cdcl"
   solver-version = 1

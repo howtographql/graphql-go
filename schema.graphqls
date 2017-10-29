@@ -1,5 +1,5 @@
 type Link {
-    id: ID!
+    id: String!
     url: String!
     description: String!
 }

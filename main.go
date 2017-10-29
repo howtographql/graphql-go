@@ -4,10 +4,12 @@ import (
 	"log"
 	"net/http"
 
+	_ "github.com/howtographql/graphql-go/db"
+
+	"fmt"
+	"github.com/howtographql/graphql-go/resolvers"
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/relay"
-	"github.com/howtographql/graphql-go/resolvers"
-	"fmt"
 	"io/ioutil"
 )
 

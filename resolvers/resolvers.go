@@ -1,49 +1,29 @@
 package resolvers
 
-import "github.com/neelance/graphql-go"
-
-type Link struct {
-	ID          graphql.ID
-	URL         string
-	Description string
-}
-
-var allLinks = []*Link{
-	{
-		ID:          "1",
-		URL:         "http://howtographql.com",
-		Description: "The best resource for learning GraphQL",
-	},
-	{
-		ID:          "2",
-		URL:         "https://golang.org/",
-		Description: "A language that makes it easy to build simple, reliable, and efficient software.",
-	},
-}
-
-var linkData = make(map[graphql.ID]*Link)
-
-func init() {
-	for _, l := range allLinks {
-		linkData[l.ID] = l
-	}
-}
+import (
+	"github.com/howtographql/graphql-go/db"
+)
 
 type Resolver struct{}
 
+// AllLinks wraps each link formatting it to
+// a resolver and appending it to the list of resolvers
 func (r *Resolver) AllLinks() *[]*linkResolver {
 	var l []*linkResolver
-	for _, link := range allLinks {
+	wrapper := func(link *db.Link) {
 		l = append(l, &linkResolver{link})
 	}
+
+	db.AllLinks(wrapper)
+
 	return &l
 }
 
 type linkResolver struct {
-	l *Link
+	l *db.Link
 }
 
-func (r *linkResolver) ID() graphql.ID {
+func (r *linkResolver) ID() string {
 	return r.l.ID
 }
 
@@ -55,8 +35,7 @@ func (r *linkResolver) Description() string {
 	return r.l.Description
 }
 
-func (r *Resolver) CreateLink(link *Link) *linkResolver {
-	link.ID = "3"
-	allLinks = append(allLinks, link)
+func (r *Resolver) CreateLink(link *db.Link) *linkResolver {
+	db.CreateLink(link)
 	return &linkResolver{link}
 }
