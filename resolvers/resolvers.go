@@ -1,26 +1,31 @@
 package resolvers
 
+import "github.com/neelance/graphql-go"
+
 type Link struct {
-	url         string
-	description string
+	ID          graphql.ID
+	URL         string
+	Description string
 }
 
 var allLinks = []*Link{
 	{
-		url:         "http://howtographql.com",
-		description: "The best resource for learning GraphQL",
+		ID:          "1",
+		URL:         "http://howtographql.com",
+		Description: "The best resource for learning GraphQL",
 	},
 	{
-		url:         "https://golang.org/",
-		description: "A language that makes it easy to build simple, reliable, and efficient software.",
+		ID:          "2",
+		URL:         "https://golang.org/",
+		Description: "A language that makes it easy to build simple, reliable, and efficient software.",
 	},
 }
 
-var linkData = make(map[string]*Link)
+var linkData = make(map[graphql.ID]*Link)
 
 func init() {
 	for _, l := range allLinks {
-		linkData[l.url] = l
+		linkData[l.ID] = l
 	}
 }
 
@@ -38,10 +43,20 @@ type linkResolver struct {
 	l *Link
 }
 
+func (r *linkResolver) ID() graphql.ID {
+	return r.l.ID
+}
+
 func (r *linkResolver) URL() string {
-	return r.l.url
+	return r.l.URL
 }
 
 func (r *linkResolver) Description() string {
-	return r.l.description
+	return r.l.Description
+}
+
+func (r *Resolver) CreateLink(link *Link) *linkResolver {
+	link.ID = "3"
+	allLinks = append(allLinks, link)
+	return &linkResolver{link}
 }
