@@ -1,0 +1,1 @@
+ALTER TABLE link ADD COLUMN posted_by VARCHAR(100) REFERENCES users(id);

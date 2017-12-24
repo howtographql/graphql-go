@@ -6,11 +6,12 @@ import (
 
 	_ "github.com/howtographql/graphql-go/db"
 
-	"fmt"
 	"github.com/howtographql/graphql-go/resolvers"
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/relay"
 	"io/ioutil"
+	"strings"
+	"context"
 )
 
 var schema *graphql.Schema
@@ -29,9 +30,15 @@ func main() {
 		w.Write(page)
 	}))
 
-	http.Handle("/query", &relay.Handler{Schema: schema})
+	http.Handle("/query", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next := &relay.Handler{Schema: schema}
+		authorization := r.Header.Get("Authorization")
+		token := strings.Replace(authorization, "Bearer ", "", 1)
+		ctx := context.WithValue(r.Context(), "AuthorizationToken", token)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}))
 
-	fmt.Println("server is running on port 8080")
+	log.Println("server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -51,6 +58,11 @@ var page = []byte(`
 			function graphQLFetcher(graphQLParams) {
 				return fetch("/query", {
 					method: "post",
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json',
+						'Authorization': 'Bearer 632788aa-781c-46e3-ad8d-825186c9c90b'
+					},
 					body: JSON.stringify(graphQLParams),
 					credentials: "include",
 				}).then(function (response) {
