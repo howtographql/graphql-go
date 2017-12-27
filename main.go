@@ -61,7 +61,7 @@ var page = []byte(`
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json',
-						'Authorization': 'Bearer 632788aa-781c-46e3-ad8d-825186c9c90b'
+						'Authorization': 'Bearer f66aa7b3-add4-4fa2-88c8-534b2905c6ca'
 					},
 					body: JSON.stringify(graphQLParams),
 					credentials: "include",

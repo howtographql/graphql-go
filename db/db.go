@@ -9,6 +9,7 @@ import (
 	"github.com/mattes/migrate"
 	"github.com/mattes/migrate/database/postgres"
 	"github.com/satori/go.uuid"
+	"time"
 )
 
 const dbURL = "postgres://postgres@localhost:5432/hackernews?sslmode=disable"
@@ -25,7 +26,10 @@ func init() {
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://db/migrations",
 		"hackernews", driver)
-	m.Steps(2)
+	if err != nil {
+		log.Println("Error occurred during migration", err)
+	}
+	m.Steps(4)
 }
 
 type Link struct {
@@ -45,6 +49,13 @@ type User struct {
 type AuthData struct {
 	Email    string
 	Password string
+}
+
+type Vote struct {
+	ID        string
+	CreatedAt string
+	UserID    string
+	LinkID    string
 }
 
 func CreateLink(link *Link) *Link {
@@ -99,4 +110,53 @@ func CreateUser(user *User) *User {
 		log.Println("error inserting user", err)
 	}
 	return user
+}
+
+func FindLinkByID(id string) *Link {
+	link := &Link{}
+	err := db.QueryRow("SELECT id, url, description, posted_by FROM link WHERE id = $1", id).Scan(&link.ID, &link.URL, &link.Description, &link.PostedBy)
+	if err != nil {
+		log.Println("error fetching link by id", err)
+	}
+	return link
+}
+
+func CreateVote(vote *Vote) *Vote {
+	vote.ID = uuid.NewV4().String()
+	vote.CreatedAt = time.Now().Format(time.RubyDate)
+	_, err := db.Exec("INSERT INTO vote(id, created_at, user_id, link_id) VALUES($1, $2, $3, $4)", vote.ID, vote.CreatedAt, vote.UserID, vote.LinkID)
+	if err != nil {
+		log.Println("error inserting vote", err)
+	}
+	return vote
+}
+
+func FindVotesByLinkID(linkID string, wrapper func(vote *Vote)) {
+	res, err := db.Query("SELECT id, created_at, user_id, link_id FROM vote WHERE link_id = $1", linkID)
+	if err != nil {
+		log.Println("error fetching votes", err)
+	}
+	defer res.Close()
+	for res.Next() {
+		vote := Vote{}
+		if err := res.Scan(&vote.ID, &vote.CreatedAt, &vote.UserID, &vote.LinkID); err != nil {
+			log.Fatal(err)
+		}
+		wrapper(&vote)
+	}
+}
+
+func FindVotesByUserID(userID string, wrapper func(vote *Vote)) {
+	res, err := db.Query("SELECT id, created_at, user_id, link_id FROM vote WHERE user_id = $1", userID)
+	if err != nil {
+		log.Println("error fetching votes", err)
+	}
+	defer res.Close()
+	for res.Next() {
+		vote := Vote{}
+		if err := res.Scan(&vote.ID, &vote.CreatedAt, &vote.UserID, &vote.LinkID); err != nil {
+			log.Fatal(err)
+		}
+		wrapper(&vote)
+	}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/neelance/graphql-go"
 	"context"
 	"log"
+	"time"
 )
 
 type Resolver struct{}
@@ -46,6 +47,20 @@ func (r *linkResolver) PostedBy() *userResolver {
 	return &userResolver{user}
 }
 
+func (r *linkResolver) Votes(ctx context.Context) []*voteResolver {
+	if fetchUserFromAuthorizationToken(ctx) == nil {
+		return nil
+	}
+	var v []*voteResolver
+	wrapper := func(vote *db.Vote) {
+		v = append(v, &voteResolver{vote})
+	}
+
+	db.FindVotesByLinkID(r.l.ID, wrapper)
+
+	return v
+}
+
 func (r *Resolver) CreateLink(ctx context.Context, link *db.Link) *linkResolver {
 	user := fetchUserFromAuthorizationToken(ctx)
 	if user == nil {
@@ -74,6 +89,20 @@ func (r *userResolver) Email() *string {
 
 func (r *userResolver) Password() *string {
 	return &r.u.Password
+}
+
+func (r *userResolver) Votes(ctx context.Context) []*voteResolver {
+	if fetchUserFromAuthorizationToken(ctx) == nil {
+		return nil
+	}
+	var v []*voteResolver
+	wrapper := func(vote *db.Vote) {
+		v = append(v, &voteResolver{vote})
+	}
+
+	db.FindVotesByUserID(r.u.ID, wrapper)
+
+	return v
 }
 
 func (r *Resolver) CreateUser(args *struct {
@@ -134,4 +163,39 @@ func fetchUserFromAuthorizationToken(ctx context.Context) *db.User {
 	}
 
 	return db.FindUserByID(token)
+}
+
+type voteResolver struct {
+	v *db.Vote
+}
+
+func (r *Resolver) CreateVote(args *struct {
+	LinkID *string
+	UserID *string
+}) *voteResolver {
+	vote := &db.Vote{LinkID: *args.LinkID, UserID: *args.UserID}
+	db.CreateVote(vote)
+	return &voteResolver{vote}
+}
+
+func (r *voteResolver) ID() graphql.ID {
+	return graphql.ID(r.v.ID)
+}
+
+func (r *voteResolver) CreatedAt() graphql.Time {
+	t, err := time.Parse(time.RubyDate, r.v.CreatedAt)
+	if err != nil {
+		log.Println("Error occurred while parsing time", err)
+	}
+	return graphql.Time{t}
+}
+
+func (r *voteResolver) User() *userResolver {
+	user := db.FindUserByID(r.v.UserID)
+	return &userResolver{user}
+}
+
+func (r *voteResolver) Link() *linkResolver {
+	link := db.FindLinkByID(r.v.LinkID)
+	return &linkResolver{link}
 }
